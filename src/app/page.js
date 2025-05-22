@@ -30,6 +30,7 @@ import {
 import { LegendProps } from "recharts";
 import response from "@/data/lynk900_synthetic_survey_data.json";
 import { lotusData } from "@/data/mockdata";
+import TableOfContents from "./components/TableOfContents";
 
 // 自定义颜色数组
 const COLORS = [
@@ -73,7 +74,7 @@ const CustomTooltip = ({ active, payload, total }) => {
   return null;
 };
 
-const QuestionStats = ({ questionData }) => {
+const QuestionStats = ({ index, questionData }) => {
   const [showOptions, setShowOptions] = useState(false);
   const answers = questionData.answer || {};
   const answerKeys = Object.keys(answers);
@@ -177,7 +178,7 @@ const QuestionStats = ({ questionData }) => {
   };
 
   return (
-    <div className={containerClassName}>
+    <div className={containerClassName} id={`question-${index}`}>
       <h3 className="question-title">{questionData.question}</h3>
       <div>
         {chartType === "pie" ? (
@@ -407,7 +408,7 @@ const InterviewRecord = ({ interview, index }) => {
   const consumerInfo = `${consumer.age}岁 ${consumerGender} ${consumer.region}`;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
+    <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200" id={`interview-${index}`}>
       <div className="border-b border-gray-200 pb-4 mb-6">
         <h3 className="text-xl font-semibold mb-2 text-gray-800">
           访谈记录 #{index + 1}: {consumer.name || "匿名"}
@@ -491,6 +492,7 @@ const InterviewRecord = ({ interview, index }) => {
 const SyntheticSurveyPageContainer = () => {
   const data = response["results"];
   // const data = lotusData;
+  const interviews = response["interviewer_records"];
 
   // CSS样式
   const reportStyles = `/* Basic styles for markdown */
@@ -673,6 +675,7 @@ const SyntheticSurveyPageContainer = () => {
   return (
     <div>
       <style>{reportStyles}</style>
+      <TableOfContents data={data} interviewRecords={interviews}/>
       <div className="report-container">
         <h1 className="report-title" id="reportTitle">
           {data.raw_survey?.topic
@@ -681,7 +684,7 @@ const SyntheticSurveyPageContainer = () => {
         </h1>
 
         <div className="summary-section">
-          <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2">
+          <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2" id="totalAnalysis">
             总体分析
           </h2>
           <div className="summary-box">
@@ -694,13 +697,15 @@ const SyntheticSurveyPageContainer = () => {
           </div>
         </div>
 
-        <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2">
+        <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2" id="detailedStats">
           详细统计
         </h2>
         <div className="report-section">
           {data.stats && Array.isArray(data.stats) ? (
             [...data.stats].map((questionData, index) => (
-              <QuestionStats key={index} questionData={questionData} />
+
+                <QuestionStats  index={index} questionData={questionData} />
+
             ))
           ) : (
             <p>
@@ -717,12 +722,12 @@ const SyntheticSurveyPageContainer = () => {
             marginBottom: "50px",
           }}
         >
-          <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2">
+          <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2" id="interviews">
             访谈记录
           </h2>
-          {response["interviewer_records"] &&
-          response["interviewer_records"].length > 0 ? (
-            response["interviewer_records"].map((interview, index) => (
+          {interviews &&
+          interviews.length > 0 ? (
+            interviews.map((interview, index) => (
               <InterviewRecord
                 key={index}
                 interview={interview}
