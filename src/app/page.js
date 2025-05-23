@@ -1,16 +1,6 @@
 "use client";
-// import "@/locales/i18n";
-// import { PageLayout } from "@/components/common/PageLayout";
-// import { notFound } from "next/navigation";
+
 import { useState, useEffect } from "react";
-// import { useToken } from "@/app/TokenContext";
-// import {
-//   getSyntheticSurveyDetail,
-//   SyntheticSurveyPayload,
-// } from "@/service/syntheticSurveyClient";
-// import { useEnvContext } from "@/env/EnvContext";
-// import AnimatedLoadingLogo from "@/components/common/LoadingIcons/AnimatedLoadingLogo";
-// import { SyntheticSurveyResult } from "@/service/syntheticSurveyClient";
 import ReactMarkdown from "react-markdown";
 import MarkdownComponents from "./components/ChatWidget/MarkdownComponents";
 import {
@@ -27,10 +17,9 @@ import {
   ResponsiveContainer,
   TooltipProps,
 } from "recharts";
-import { LegendProps } from "recharts";
 import response from "@/data/lynk900_synthetic_survey_data.json";
-import { lotusData } from "@/data/mockdata";
 import TableOfContents from "./components/TableOfContents";
+import remarkGfm from "remark-gfm";
 
 // 自定义颜色数组
 const COLORS = [
@@ -43,6 +32,11 @@ const COLORS = [
   "#457b9d",
   "#1d3557",
 ];
+
+function fixMarkdownStrong(text) {
+  // 非贪婪匹配每一对**...**，只在结尾**后紧跟非空白字符时加空格
+  return text.replace(/(\*\*.*?\*\*)(?=[^\s\n])/g, "$1 ");
+}
 
 const CustomTooltip = ({ active, payload, total }) => {
   if (active && payload && payload.length) {
@@ -270,7 +264,7 @@ const QuestionStats = ({ index, questionData }) => {
                 <h4>结果分析与总结</h4>
                 <div className="markdown-content">
                   <ReactMarkdown components={MarkdownComponents}>
-                    {questionData.summary}
+                    {fixMarkdownStrong(questionData.summary)}
                   </ReactMarkdown>
                 </div>
               </div>
@@ -357,7 +351,7 @@ const QuestionStats = ({ index, questionData }) => {
                 <h4>结果分析与总结</h4>
                 <div className="markdown-content">
                   <ReactMarkdown components={MarkdownComponents}>
-                    {questionData.summary}
+                    {fixMarkdownStrong(questionData.summary)}
                   </ReactMarkdown>
                 </div>
               </div>
@@ -408,7 +402,10 @@ const InterviewRecord = ({ interview, index }) => {
   const consumerInfo = `${consumer.age}岁 ${consumerGender} ${consumer.region}`;
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200" id={`interview-${index}`}>
+    <div
+      className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200"
+      id={`interview-${index}`}
+    >
       <div className="border-b border-gray-200 pb-4 mb-6">
         <h3 className="text-xl font-semibold mb-2 text-gray-800">
           访谈记录 #{index + 1}: {consumer.name || "匿名"}
@@ -480,7 +477,7 @@ const InterviewRecord = ({ interview, index }) => {
               components={MarkdownComponents}
               className="text-gray-700"
             >
-              {interview.summary}
+              {fixMarkdownStrong(interview.summary)}
             </ReactMarkdown>
           </div>
         </div>
@@ -675,7 +672,7 @@ const SyntheticSurveyPageContainer = () => {
   return (
     <div>
       <style>{reportStyles}</style>
-      <TableOfContents data={data} interviewRecords={interviews}/>
+      <TableOfContents data={data} interviewRecords={interviews} />
       <div className="report-container">
         <h1 className="report-title" id="reportTitle">
           {data.raw_survey?.topic
@@ -684,7 +681,10 @@ const SyntheticSurveyPageContainer = () => {
         </h1>
 
         <div className="summary-section">
-          <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2" id="totalAnalysis">
+          <h2
+            className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2"
+            id="totalAnalysis"
+          >
             总体分析
           </h2>
           <div className="summary-box">
@@ -692,20 +692,36 @@ const SyntheticSurveyPageContainer = () => {
               components={MarkdownComponents}
               className="markdown-content"
             >
-              {data.total_summary || "*未提供总体总结。*"}
+              {fixMarkdownStrong(data.total_summary || "*未提供总体总结。*")}
+            </ReactMarkdown>
+          </div>
+          <h2
+            className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2"
+            id="totalAnalysis"
+          >
+            决策建议
+          </h2>
+          <div className="summary-box">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={MarkdownComponents}
+              className="markdown-content"
+            >
+              {fixMarkdownStrong(data.suggestion) || "*未提供总体总结。*"}
             </ReactMarkdown>
           </div>
         </div>
 
-        <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2" id="detailedStats">
+        <h2
+          className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2"
+          id="detailedStats"
+        >
           详细统计
         </h2>
         <div className="report-section">
           {data.stats && Array.isArray(data.stats) ? (
             [...data.stats].map((questionData, index) => (
-
-                <QuestionStats  index={index} questionData={questionData} />
-
+              <QuestionStats index={index} questionData={questionData} />
             ))
           ) : (
             <p>
@@ -722,11 +738,13 @@ const SyntheticSurveyPageContainer = () => {
             marginBottom: "50px",
           }}
         >
-          <h2 className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2" id="interviews">
+          <h2
+            className="text-[#3a7e6d] text-2xl font-bold mb-4 mt-10 border-b pb-2"
+            id="interviews"
+          >
             访谈记录
           </h2>
-          {interviews &&
-          interviews.length > 0 ? (
+          {interviews && interviews.length > 0 ? (
             interviews.map((interview, index) => (
               <InterviewRecord
                 key={index}
