@@ -34,8 +34,8 @@ const COLORS = [
 ];
 
 function fixMarkdownStrong(text) {
-  // 非贪婪匹配每一对**...**，只在结尾**后紧跟非空白字符时加空格
-  return text.replace(/(\*\*.*?\*\*)(?=[^\s\n])/g, "$1 ");
+  text = text.replace(/\\n/g, '\n');
+  return text.replace(/(\*\*[^* \n][^*]*?[^* \n]?\*\*)/g, '$1 ');
 }
 
 const CustomTooltip = ({ active, payload, total }) => {
@@ -668,6 +668,9 @@ const SyntheticSurveyPageContainer = () => {
        /* Hide non-essential elements */
       script { display: none; }
   }`;
+  console.log(JSON.stringify(fixMarkdownStrong(data.total_summary)));
+
+  console.log(JSON.stringify(data.total_summary));
 
   return (
     <div>
