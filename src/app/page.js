@@ -668,9 +668,6 @@ const SyntheticSurveyPageContainer = () => {
        /* Hide non-essential elements */
       script { display: none; }
   }`;
-  console.log(JSON.stringify(fixMarkdownStrong(data.total_summary)));
-
-  console.log(JSON.stringify(data.total_summary));
 
   return (
     <div>
